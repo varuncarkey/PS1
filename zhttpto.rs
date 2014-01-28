@@ -18,6 +18,7 @@ use std::{str};
 
 static IP: &'static str = "127.0.0.1";
 static PORT:        int = 4414;
+static mut visitorCount: int = 0;
 
 fn main() {
 
@@ -26,15 +27,14 @@ fn main() {
     
     println(format!("Listening on [{:s}] ...", addr.to_str()));
     
-    let mut mainCount = ~0;
     
     for stream in acceptor.incoming() {
         // Spawn a task to handle the connection
         
-        *mainCount = *mainCount + 1;
+        unsafe{
+        visitorCount += 1;
+        }
         
-        let inCount = mainCount.clone();
-        println!("{:d}", *inCount);
                 
         do spawn {
             let mut stream = stream;
@@ -101,7 +101,7 @@ fn main() {
                  </style></head>
                  <body>
                  <h1>Greetings, Krusty!</h1>
-                 <p>Visitor Count : "+ inCount.to_str() +"</p>
+                 <p>Visitor Count : "+ unsafe{visitorCount.to_str()}  +"</p>
                  </body></html>\r\n";
             stream.write(response.as_bytes());
             println!("Connection terminates.");
